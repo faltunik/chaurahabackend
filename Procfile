@@ -1,1 +1,1 @@
-web : gunicorn chauraha.wsgi
+web: gunicorn chauraha.wsgi
