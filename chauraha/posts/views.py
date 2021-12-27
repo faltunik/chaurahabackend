@@ -72,7 +72,7 @@ class CommentView(viewsets.ViewSet):
         post = Post.objects.get(id = request.GET.get('id', 1))
         
         # in url fronted: http://127.0.0.1:8000/comments/comment/?id={post.id} eg.= http://127.0.0.1:8000/comments/comment/?id=1
-        queryset = post.comments.all().order_by('-id')
+        queryset = post.comments.all()
         serializer = CommentSerializer(queryset, many= True)
         return Response(serializer.data)
 
