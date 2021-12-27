@@ -15,6 +15,10 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ('id', 'content', 'author',)
 
 class PostLikeSerializer(serializers.ModelSerializer):
+    # like = serializers.SlugRelatedField(
+    #     read_only=True,
+    #     slug_field='like'
+    #  )
     class Meta:
         model = Post
         fields = ('id', 'like',)

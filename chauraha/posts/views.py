@@ -170,13 +170,6 @@ class SublyView(viewsets.ViewSet):
 
 
 
-@api_view(['POST'])
-def like_post(request):
-    post = Post.objects.get(request.postid)
-    serializer = PostLikeSerializer(request.data)
-    user = request.user
-    post.like.add(user)
-    return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 class PostLikeAPI(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -202,7 +195,30 @@ class PostLikeAPI(APIView):
         # serializer = SublySerializer(obj, many= True)
         return Response(data)
 
+
+class AddLikeUnlikeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self,request, pk =None):
+        print(request)
+        post = Post.objects.get(pk=pk)
+        serializer = PostLikeSerializer(post, many=True)
+        if post.likes.filter(pk=request.user.pk).exists():                                                              
+            post.likes.remove(request.user)
+        else:           
+            post.likes.add(request.user)  
+        return Response(serializer.data)
+
     
+
+
+
+# @api_view(['POST'])
+# def like_post(request):
+#     post = Post.objects.get(request.postid)
+#     serializer = PostLikeSerializer(request.data)
+#     user = request.user
+#     post.like.add(user)
+#     return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 # @api_view(['GET', 'POST'])
 # @permission_classes([IsAuthenticated])
