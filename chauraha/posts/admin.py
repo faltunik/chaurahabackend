@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Post, Comment
+from .models import Post, Comment, Subly
 
 # Register your models here.
 @admin.register(Post)
 class CustomUserAdmin(admin.ModelAdmin):
-  list_display = ['author', 'id', ]
+  list_display = ['author', 'id', 'content', ]
 
 
 # register comment
@@ -12,6 +12,9 @@ class CustomUserAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
   list_display = ['id', 'author']
 
+@admin.register(Subly)
+class SublyAdmin(admin.ModelAdmin):
+  list_display = ['id', 'author']
 
 
 

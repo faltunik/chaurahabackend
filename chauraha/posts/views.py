@@ -1,12 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404, HttpResponse, JsonResponse
-from .models import Comment, Post
+from rest_framework.views import APIView
+from .models import Comment, Post, Subly
 from rest_framework import serializers, viewsets, status
-from .serializers import CommentSerializer, PostSerializer
+from .serializers import CommentSerializer, PostSerializer, SublySerializer, PostLikeSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import permissions
 
 # Create your views here.
 
@@ -68,6 +70,7 @@ class CommentView(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     def list(self, request):
         post = Post.objects.get(id = request.GET.get('id', 1))
+        
         # in url fronted: http://127.0.0.1:8000/comments/comment/?id={post.id} eg.= http://127.0.0.1:8000/comments/comment/?id=1
         queryset = post.comments.all().order_by('-id')
         serializer = CommentSerializer(queryset, many= True)
@@ -114,14 +117,90 @@ class CommentView(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class SublyView(viewsets.ViewSet):
 
-# @api_view(['POST'])
-# def like_post(request):
-#     post = Post.objects.get(id = request.GET.get('id', 1))
-#     serializer = PostLikeSerializer(request.data)
-#     user = request.user
-#     post.like.add(user)
-#     return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+    def list(self, request):
+        print(request)
+        idint = int(request.GET.get('myid'))
+        comment = Comment.objects.get(id = idint)
+        print(comment)
+        # print(type(request.GET.get('myid')))
+
+        # in url fronted: http://127.0.0.1:8000/comments/comment/?id={post.id} eg.= http://127.0.0.1:8000/comments/comment/?id=1
+        queryset = comment.subly.all().order_by('-id')
+        serializer = SublySerializer(queryset, many= True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        try:
+            subly = Subly.objects.get(pk=pk)
+        except Subly.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = SublySerializer(subly)
+        return Response(serializer.data)
+
+    def create(self, request):
+        mydata = request.data
+        print(mydata)
+        # # dict['author'] = 'nik'
+        # mydata['author'] = str(request.user.id)
+        serializer = SublySerializer(data = mydata)
+        if serializer.is_valid():
+            serializer.save(author = request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk =None):
+        try:
+            subly = Subly.objects.get(pk=pk)
+        except Subly.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = CommentSerializer(subly, data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        subly = get_object_or_404(Subly, pk= pk)
+        if subly.author != request.user:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        subly.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+@api_view(['POST'])
+def like_post(request):
+    post = Post.objects.get(request.postid)
+    serializer = PostLikeSerializer(request.data)
+    user = request.user
+    post.like.add(user)
+    return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+class PostLikeAPI(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    def get(self, request):
+        # slug = self.kwargs.get("slug")
+        print(request)
+        obj = get_object_or_404(Post, id = request.GET.get('getid', 1) )
+        user = self.request.user
+        updated = False
+        liked = False
+        if user.is_authenticated:
+            if user in obj.like.all():
+                liked = False
+                obj.like.remove(user)
+            else:
+                liked = True
+                obj.like.add(user)
+            updated = True
+        data = {
+            "updated": updated,
+            "liked": liked
+        }
+        # serializer = SublySerializer(obj, many= True)
+        return Response(data)
 
     
 
