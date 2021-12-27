@@ -20,6 +20,10 @@ class Comment(models.Model):
         return self.body[:15]
 
 
-# class Subly(models.Model):
-#     body = models.TextField()
-#     comment = models.For
+class Subly(models.Model):
+    body = models.TextField()
+    comment = models.ForeignKey(Comment, on_delete= models.CASCADE, related_name= 'subly')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subly')
+
+    def __str__(self):
+        return self.body[:15]
