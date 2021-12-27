@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
-from .models  import Post, Comment
+from .models  import Post, Comment, Subly
 from users.serializers import CustomUserSerializer
 
 class PostSerializer(serializers.ModelSerializer):
@@ -14,10 +14,10 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'content', 'author',)
 
-# class PostLikeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Post
-#         fields = ('id', 'like',)
+class PostLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('id', 'like',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -28,5 +28,15 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'body', 'post', 'author',)
+
+
+class SublySerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='branch'
+     )
+    class Meta:
+        model = Subly
+        fields = ('id', 'body', 'comment', 'author',)
 
         

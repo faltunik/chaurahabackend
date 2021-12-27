@@ -22,13 +22,17 @@ from rest_framework.routers import DefaultRouter
 
 post_router = DefaultRouter()
 comment_router = DefaultRouter()
+subly_router = DefaultRouter()
 # register our viewset with router
-post_router.register('post', views.PostView, basename = 'posts')
+post_router.register('post', views.PostView, basename = 'post')
 comment_router.register('comment', views.CommentView, basename= 'comments')
+subly_router.register('subly', views.SublyView, basename= 'sublys')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
+    path('like/', include('posts.urls')),
     path('post/', include(post_router.urls)),
     path('comments/', include(comment_router.urls)),
+    path('sublys/', include(subly_router.urls)),
 ]
